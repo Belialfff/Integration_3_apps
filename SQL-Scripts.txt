@@ -1,4 +1,4 @@
-create database technic ;
+create database Technic ;
 
 CREATE TABLE IF NOT EXISTS customer
 (
