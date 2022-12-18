@@ -1,5 +1,5 @@
 from app import app
-from app import jsonify
+from flask import jsonify
 
 @app.route('/', methods = ['GET'])
 def get_():
