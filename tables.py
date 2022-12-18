@@ -1,4 +1,9 @@
+"""Belialfff"""
+"""Файл со схемами таблиц баз данных"""
+
+
 from app import db
+
 
 class Customer(db.Model):
     __tablename__ = 'customer'
