@@ -53,7 +53,6 @@ def get_customer_orders_by_name(name):
     customers_orders = db.session.query(Orders.technic, Orders.price)\
         .select_from(Customer).join(Orders, Customer.id == Orders.id_customer).filter(Customer.customer_name == name).order_by(Customer.customer_name).all()
     result = customers_orders_schema_many.dump(customers_orders)
-
     phone_num = db.session.query(Customer.phone_number).filter(Customer.customer_name == name).limit(1)
     rusult_num = customers_orders_schema_many.dump(phone_num)
 
