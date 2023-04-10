@@ -31,7 +31,7 @@ def get_orders(id):
             "id": 1,
             "id_customer": 1,
             "price": 1600,
-            "technic": str,
+            "technic": "Смартфон"
         }
     ] Сортировка по id , лимит записей 15"""
 
@@ -69,7 +69,7 @@ def new_orders():
     """Роут выполняет добавление в таблицу orders новую запись, шаблон:
     {
       "id_customer" : int,
-      "technic": str,
+      "technic": string,
       "price": int
      }
     возвращает обновлённый список записей с сортировкой по id, количество записей ограничено 15"""
@@ -117,7 +117,6 @@ def new_orders():
 
     orders_ = db_a.session.query(Orders_a).all()
     result = orders_schema_many.dump(orders_)
-    print(result)
 
     return jsonify(result)
 
@@ -129,7 +128,7 @@ def update_orders(id):
     {
 
             "id_customer": int,
-            "technic": str,
+            "technic" : str,
             "price" : int
 
     }"""
@@ -139,7 +138,7 @@ def update_orders(id):
     price_req = request.json['price']
     id_customer_req = request.json['id_customer']
 
-    db_a.session.query(Orders_a).filter(Orders_a.id == id_req).update(dict( technic = technic_req, price = price_req, id_customer = id_customer_req))
+    db_a.session.query(Orders_a).filter(Orders_a.id == id_req).update(dict(technic = technic_req, price = price_req, id_customer = id_customer_req))
     db_a.session.commit()
     orders_ = db_a.session.query(Orders_a).order_by(Orders_a.id).limit(15)
     result = orders_schema_many.dump(orders_)

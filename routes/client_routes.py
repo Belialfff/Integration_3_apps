@@ -33,12 +33,22 @@ def get_clients():
 
     return jsonify(result)
 
-@app_clients.route('/clients_price', methods=['GET'])
+@app_clients.route('/clients_price', methods=['POST'])
 def get_price():
 
     phone = request.json['phone_number']
+    price_req = request.json['price']
 
-    customer_ = db_clients.session.query(Clients).filter(Clients.phone_number == phone).limit(15)
-    result = clients_schema_many.dump(customer_)
+    old_price = db_clients.session.query(Clients).filter(Clients.phone_number == phone).all()
+    old_price_ = clients_schema_many.dump(old_price)
+
+    raw_dict = old_price_[0]
+    a = raw_dict['price']
+
+    rice_t = a+price_req
+
+    new_price = db_clients.session.query(Clients).filter(Clients.phone_number == phone).update({Clients.price: rice_t})
+    db_clients.session.commit()
+    result = {'message': 'Price updated successfully'}
 
     return jsonify(result)

@@ -3,26 +3,26 @@
 
 
 from flask import jsonify, request
-from app_a import db_a, app_a, ma_a
-from tables_a import Orders_a, Customer_a
+from app_b import db_b, app_b, ma_b
+from tables_b import Orders_b, Customer_b
 import json, requests
 
 """Определение полей схемы"""
-class OrdersSchema(ma_a.Schema):
+class OrdersSchema(ma_b.Schema):
     class Meta:
-        fields = ('id', 'technic', 'price', 'id_customer')
+        fields = ('id', 'clin_type', 'price', 'id_customer')
 
 """Условность Marshmallow для получения нескольких запросов, таким образом данные будут попадать в список"""
 orders_schema_many = OrdersSchema(many=True)
 
-class SnpSchema(ma_a.Schema):
+class SnpSchema(ma_b.Schema):
     class Meta:
         fields = ('phone_number',)
 
 """Условность Marshmallow для получения нескольких запросов, таким образом данные будут попадать в список"""
 customers_orders_schema_many = SnpSchema(many=True)
 
-@app_a.route('/orders/<id>', methods=['GET'])
+@app_b.route('/orders/<id>', methods=['GET'])
 def get_orders(id):
 
     """Роут для полчения записи из таблицы orders по id вида:
@@ -31,64 +31,64 @@ def get_orders(id):
             "id": 1,
             "id_customer": 1,
             "price": 1600,
-            "technic": str,
+            "clin_type" : str,
         }
     ] Сортировка по id , лимит записей 15"""
 
-    get_order = db_a.session.query(Orders_a).filter(Orders_a.id == id).limit(15)
+    get_order = db_b.session.query(Orders_b).filter(Orders_b.id == id).limit(15)
     result = orders_schema_many.dump(get_order)
 
     return jsonify(result)
 
-@app_a.route('/orders', methods=['GET'])
+@app_b.route('/orders', methods=['GET'])
 def get_orders_all():
 
     """ Роут для полчения списка всех записей таблицы orders ,отсортированных по id, количество возвращаемых записей ограничено 15."""
 
-    all_orders = db_a.session.query(Orders_a).order_by(Orders_a.id).limit(15)
+    all_orders = db_b.session.query(Orders_b).order_by(Orders_b.id).limit(15)
     result = orders_schema_many.dump(all_orders)
     return jsonify(result)
 
-@app_a.route('/orders/<id>', methods=['DELETE'])
+@app_b.route('/orders/<id>', methods=['DELETE'])
 def del_orders(id):
 
     """ Роут для удаления записи из таблицы orders по id, возвращает все записи таблицы orders, отсортированные по id,
     количество возвращаемых записей ограничено 15"""
 
     id_req = id
-    db_a.session.query(Orders_a).filter(Orders_a.id == id_req).delete()
-    db_a.session.commit()
-    orders_ = db_a.session.query(Orders_a).order_by(Orders_a.id).limit(15)
+    db_b.session.query(Orders_b).filter(Orders_b.id == id_req).delete()
+    db_b.session.commit()
+    orders_ = db_b.session.query(Orders_b).order_by(Orders_b.id).limit(15)
     result = orders_schema_many.dump(orders_)
 
     return jsonify(result)
 
-@app_a.route('/orders', methods=['PUT'])
+@app_b.route('/orders', methods=['PUT'])
 def new_orders():
 
     """Роут выполняет добавление в таблицу orders новую запись, шаблон:
     {
       "id_customer" : int,
-      "technic": str,
+      "clin_type" : str,
       "price": int
      }
     возвращает обновлённый список записей с сортировкой по id, количество записей ограничено 15"""
 
-    technic_req = request.json['technic']
+    clin_type_req = request.json['clin_type']
     price_req = request.json['price']
     id_customer_req = request.json['id_customer']
 
-    new_order = Orders_a(technic_req, price_req, id_customer_req)
-    db_a.session.add(new_order)
-    db_a.session.commit()
+    new_order = Orders_b(clin_type_req, price_req, id_customer_req)
+    db_b.session.add(new_order)
+    db_b.session.commit()
 
-    orders_ = db_a.session.query(Orders_a).all()
+    orders_ = db_b.session.query(Orders_b).all()
     result = orders_schema_many.dump(orders_)
 
 
-    customers_orders = db_a.session.query(Customer_a.phone_number)\
-        .select_from(Customer_a).join(Orders_a, Customer_a.id == Orders_a.id_customer).\
-        filter(Customer_a.id == id_customer_req).all()
+    customers_orders = db_b.session.query(Customer_b.phone_number)\
+        .select_from(Customer_b).join(Orders_b, Customer_b.id == Orders_b.id_customer).\
+        filter(Customer_b.id == id_customer_req).all()
     nm = customers_orders_schema_many.dump(customers_orders)
 
     number = nm[0]
@@ -115,13 +115,12 @@ def new_orders():
     else:
         return jsonify({"message": "Ошибка"}), 500
 
-    orders_ = db_a.session.query(Orders_a).all()
+    orders_ = db_b.session.query(Orders_b).all()
     result = orders_schema_many.dump(orders_)
-    print(result)
 
     return jsonify(result)
 
-@app_a.route('/orders/<id>', methods=['PATCH'])
+@app_b.route('/orders/<id>', methods=['PATCH'])
 def update_orders(id):
 
     """Роут для обновления записи в таблице orders по id, возвращает обновлённый список записей с сортировкой по id, количество записей ограничено 15.
@@ -129,19 +128,20 @@ def update_orders(id):
     {
 
             "id_customer": int,
-            "technic": str,
+            "clin_type" : str,
             "price" : int
 
     }"""
 
     id_req = id
-    technic_req = request.json['technic']
+    clin_type_req = request.json['clin_type']
     price_req = request.json['price']
     id_customer_req = request.json['id_customer']
 
-    db_a.session.query(Orders_a).filter(Orders_a.id == id_req).update(dict( technic = technic_req, price = price_req, id_customer = id_customer_req))
-    db_a.session.commit()
-    orders_ = db_a.session.query(Orders_a).order_by(Orders_a.id).limit(15)
+    db_b.session.query(Orders_b).filter(Orders_b.id == id_req).update(dict(clin_type = clin_type_req, price = price_req, id_customer = id_customer_req))
+    db_b.session.commit()
+    orders_ = db_b.session.query(Orders_b).order_by(Orders_b.id).limit(15)
     result = orders_schema_many.dump(orders_)
+    print(result)
 
     return jsonify(result)

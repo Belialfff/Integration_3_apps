@@ -5,7 +5,8 @@
 from flask import jsonify, request
 from app_b import app_b, db_b, ma_b
 from tables_b import Customer_b, Orders_b
-
+import json
+import requests
 
 """Определение полей схемы"""
 class CustomersSchema(ma_b.Schema):
@@ -83,6 +84,7 @@ def del_customers(id):
     result = customers_schema_many.dump(customer_)
     return jsonify(result)
 
+
 @app_b.route('/customer', methods=['PUT'])
 def new_customer():
 
@@ -101,8 +103,22 @@ def new_customer():
     db_b.session.add(new_customer)
     db_b.session.commit()
 
+    customer_data = {
+        "customer_name": customer_name_req,
+        "phone_number": phone_number_req,
+        "price": 0
+    }
+    headers = {'Content-Type': 'application/json'}
+    response = requests.post('http://127.0.0.1:8002/clients', headers=headers, data=json.dumps(customer_data))
+
+    if response.status_code == 200:
+        # получение обновленного списка клиентов из второго приложения
+        customers_data = json.loads(response.content)
+        return jsonify(customers_data)
+    else:
+        return jsonify({"message": "Ошибка при добавлении клиента во второе приложение"}), 500
+
     customer_ = db_b.session.query(Customer_b).order_by(Customer_b.id).limit(15)
     result = customers_schema_many.dump(customer_)
-
+    print(result)
     return jsonify(result)
-

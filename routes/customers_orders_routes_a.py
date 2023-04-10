@@ -60,8 +60,8 @@ def get_customer_orders_by_name(name):
 
     return jsonify({f"customer_name: {name} {rusult_num}":result})
 
-@app_a.route('/cis', methods=['GET'])
-def get_customer_orders_by_phone():
+@app_a.route('/<id_customer>', methods=['GET'])
+def get_customer_orders_by_phone(id_customer):
 
     id_customer = request.json['id_customer']
 

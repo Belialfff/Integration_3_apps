@@ -119,6 +119,6 @@ def new_customer():
 
     customer_ = db_a.session.query(Customer_a).order_by(Customer_a.id).limit(15)
     result = customers_schema_many.dump(customer_)
-
+    print(result)
     return jsonify(result)
 

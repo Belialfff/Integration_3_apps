@@ -23,7 +23,7 @@ ma_b = Marshmallow(app_b)
 
 
 from routes.customers_routes_b import get_customers, get_customers_all, new_customer, update_customers, del_customers
-
+from routes.orders_routes_b import new_orders
 
 
 
