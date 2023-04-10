@@ -4,28 +4,25 @@
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from config import DB_TRACK_MODIFICATIONS, DB_URL
+from config import DB_TRACK_MODIFICATIONS, DB_URL_b
 from flask_marshmallow import Marshmallow
 
 
-app = Flask(__name__)
+app_b = Flask(__name__)
 
 """Конфиги для подлючения к бд, содержимое переменных находится во вкладке config"""
-app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = DB_TRACK_MODIFICATIONS
+app_b.config['SQLALCHEMY_DATABASE_URI'] = DB_URL_b
+app_b.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = DB_TRACK_MODIFICATIONS
 
-db = SQLAlchemy(app)
+db_b = SQLAlchemy(app_b)
 
 """Для работы с json форматом используются схемы модуля для сериализации Marshmellow"""
-ma = Marshmallow(app)
+ma_b = Marshmallow(app_b)
 
 """Импорт всех роутов, лучшего способа их обработать пока не нашёл, исправлю"""
-from orders_routes import get_orders, get_orders_all, del_orders, new_orders, update_orders
-from customers_routes import get_customers, get_customers_all, del_customers, update_customers, new_customer
-from customers_orders_routes import get_customer_orders, get_customer_orders_by_name
 
 
-
+from routes.customers_routes_b import get_customers, get_customers_all, new_customer, update_customers, del_customers
 
 
 

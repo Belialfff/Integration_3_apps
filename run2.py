@@ -2,13 +2,13 @@
 """Файл запсукает FLASK-приложение на заданном адресе (файл config.py)"""
 
 
-from app_a import app_a
-from config import SERVER_HOST, SERVER_PORT_a, SERVER_DEBUG
+from app_b import app_b
+from config import SERVER_HOST, SERVER_PORT_b, SERVER_DEBUG
 
 
-app_a.run(
+app_b.run(
 
     host=SERVER_HOST,
-    port=SERVER_PORT_a,
+    port=SERVER_PORT_b,
     debug=SERVER_DEBUG
 )

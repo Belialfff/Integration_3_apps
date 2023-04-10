@@ -1,6 +1,6 @@
-from app import app
+from app_a import app_a
 from flask import jsonify
 
-@app.route('/', methods = ['GET'])
+@app_a.route('/', methods = ['GET'])
 def get_():
     return jsonify({'msg': 'Hello World'})
