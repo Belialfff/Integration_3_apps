@@ -20,7 +20,7 @@ db_clients = SQLAlchemy(app_clients)
 ma_clients = Marshmallow(app_clients)
 
 """Импорт всех роутов, лучшего способа их обработать пока не нашёл, исправлю"""
-from routes.client_routes import get_clients
+from routes.client_routes import get_clients, del_clients, new_clients, update_customer, get_price, get_all_clients
 
 
 

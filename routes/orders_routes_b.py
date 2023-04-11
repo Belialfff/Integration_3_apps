@@ -108,7 +108,6 @@ def new_orders():
                              data=json.dumps(customer_data))
 
     if response.status_code == 200:
-        # получение обновленного списка клиентов из второго приложения
 
         customers_data = json.loads(response.content)
         return jsonify(customers_data)
@@ -123,25 +122,28 @@ def new_orders():
 @app_b.route('/orders/<id>', methods=['PATCH'])
 def update_orders(id):
 
-    """Роут для обновления записи в таблице orders по id, возвращает обновлённый список записей с сортировкой по id, количество записей ограничено 15.
-    шаблон:
-    {
+    """Роут для обновления записи в таблице orders по id, возвращает обновлённый список записей с сортировкой по id, количество записей ограничено 15."""
 
-            "id_customer": int,
-            "clin_type" : str,
-            "price" : int
 
-    }"""
+    order = Orders_b.query.get(id)
 
-    id_req = id
-    clin_type_req = request.json['clin_type']
-    price_req = request.json['price']
-    id_customer_req = request.json['id_customer']
+    if order is None:
+        return jsonify({"message": f"Запись c id {id} не найдена"}), 404
 
-    db_b.session.query(Orders_b).filter(Orders_b.id == id_req).update(dict(clin_type = clin_type_req, price = price_req, id_customer = id_customer_req))
-    db_b.session.commit()
-    orders_ = db_b.session.query(Orders_b).order_by(Orders_b.id).limit(15)
-    result = orders_schema_many.dump(orders_)
-    print(result)
+    customer_id_req = request.json.get('id_customer')
+    clin_type_req = request.json.get('clin_type')
+    price_req = request.json.get('price')
 
-    return jsonify(result)
+    if customer_id_req:
+        order.id_customer = customer_id_req
+    if clin_type_req:
+        order.clin_type = clin_type_req
+    if price_req:
+        order.price = price_req
+
+    try:
+        db_b.session.commit()
+        return jsonify({"message": f"Запись c id {id} успешно обновлена"}), 200
+    except Exception as e:
+        db_b.session.rollback()
+        return jsonify({"message": f"Ошибка при обновлении записи: {str(e)}"}), 500

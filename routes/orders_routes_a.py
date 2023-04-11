@@ -124,24 +124,28 @@ def new_orders():
 @app_a.route('/orders/<id>', methods=['PATCH'])
 def update_orders(id):
 
-    """Роут для обновления записи в таблице orders по id, возвращает обновлённый список записей с сортировкой по id, количество записей ограничено 15.
-    шаблон:
-    {
+    """Роут для обновления записи в таблице orders по id, возвращает обновлённый список записей с сортировкой по id, количество записей ограничено 15."""
 
-            "id_customer": int,
-            "technic": str,
-            "price" : int
 
-    }"""
+    order = Orders_a.query.get(id)
 
-    id_req = id
-    technic_req = request.json['technic']
-    price_req = request.json['price']
-    id_customer_req = request.json['id_customer']
+    if order is None:
+        return jsonify({"message": f"Запись c id {id} не найдена"}), 404
 
-    db_a.session.query(Orders_a).filter(Orders_a.id == id_req).update(dict( technic = technic_req, price = price_req, id_customer = id_customer_req))
-    db_a.session.commit()
-    orders_ = db_a.session.query(Orders_a).order_by(Orders_a.id).limit(15)
-    result = orders_schema_many.dump(orders_)
+    customer_id_req = request.json.get('id_customer')
+    technic_req = request.json.get('technic')
+    price_req = request.json.get('price')
 
-    return jsonify(result)
+    if customer_id_req:
+        order.id_customer = customer_id_req
+    if technic_req:
+        order.technic = technic_req
+    if price_req:
+        order.price = price_req
+
+    try:
+        db_a.session.commit()
+        return jsonify({"message": f"Запись c id {id} успешно обновлена"}), 200
+    except Exception as e:
+        db_a.session.rollback()
+        return jsonify({"message": f"Ошибка при обновлении записи: {str(e)}"}), 500

@@ -50,24 +50,28 @@ def get_customers_all():
 
 @app_b.route('/customer/<id>', methods=['PATCH'])
 def update_customers(id):
-    """#Роут для обновления записи в таблице customer по id, возвращает обновлённый список записей с сортировкой по id, количество записей ограничено 15.
-    Принимает данные вида:
-    {
+    """Роут выполняет изменение данных в таблице customer по id"""
 
-          "customer_name": str(not null),
-          "phone_number" : str
 
-    }"""
-    id_req = id
-    new_name = request.json['customer_name']
-    new_number = request.json['phone_number']
+    customer = Customer_b.query.get(id)
 
-    db_b.session.query(Customer_b).filter(Customer_b.id == id_req).update(dict(customer_name = new_name, phone_number = new_number))
-    db_b.session.commit()
+    if customer is None:
+        return jsonify({"message": f"Запись c id {id} не найдена"}), 404
 
-    customer_ = db_b.session.query(Customer_b).order_by(Customer_b.id).limit(15)
-    result = customers_schema_many.dump(customer_)
-    return jsonify(result)
+    customer_name_req = request.json.get('customer_name')
+    phone_number_req = request.json.get('phone_number')
+
+    if customer_name_req:
+        customer.customer_name = customer_name_req
+    if phone_number_req:
+        customer.phone_number = phone_number_req
+
+    try:
+        db_b.session.commit()
+        return jsonify({"message": f"Запись c id {id} успешно обновлена"}), 200
+    except Exception as e:
+        db_b.session.rollback()
+        return jsonify({"message": f"Ошибка при обновлении записи: {str(e)}"}), 500
 
 @app_b.route('/customer/<id>', methods =['DELETE'])
 def del_customers(id):
@@ -112,7 +116,6 @@ def new_customer():
     response = requests.post('http://127.0.0.1:8002/clients', headers=headers, data=json.dumps(customer_data))
 
     if response.status_code == 200:
-        # получение обновленного списка клиентов из второго приложения
         customers_data = json.loads(response.content)
         return jsonify(customers_data)
     else:
